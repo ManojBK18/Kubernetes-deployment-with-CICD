@@ -1,0 +1,48 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: api-gateway
+  namespace: url-shortener
+  labels:
+    app: api-gateway
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: api-gateway
+  template:
+    metadata:
+      labels:
+        app: api-gateway
+    imagePullSecrets:
+      - name: docker-password
+        key: dock-pass
+    spec:
+      containers:
+        - name: api-gateway
+          image: manojbk18/api-gateway:latest
+          ports:
+            - containerPort: 3000
+          env:
+            - name: SHORTENER_SERVICE_URL
+              valueFrom:
+                configMapKeyRef:
+                  name: cm
+                  key: SHORTENER_SERVICE_URL
+            - name: ANALYTICS_SERVICE_URL
+              valueFrom:
+                configMapKeyRef:
+                  name: cm
+                  key: ANALYTICS_SERVICE_URL
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 3000
+            initialDelaySeconds: 10
+            periodSeconds: 10
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 3000
+            initialDelaySeconds: 10
+            periodSeconds: 10

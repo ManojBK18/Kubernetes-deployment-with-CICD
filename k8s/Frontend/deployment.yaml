@@ -1,0 +1,36 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: frontend
+  namespace: url-shortener
+  labels:
+    app: frontend
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: frontend
+  template:
+    metadata:
+      labels:
+        app: frontend
+    imagePullSecrets:
+      - name: docker-password
+        key: dock-pass
+    containers:
+      - name: frontend
+        image: manojbk18/frontend:latest
+        ports:
+          - containerPort: 80
+    livenessProbe:
+      httpget: 
+        path: /health
+        port: 80
+      initialDelaySeconds: 10
+      periodSeconds: 10
+    readinessProbe:
+      httpget:
+        path: /health
+        port: 80
+      initialDelaySeconds: 10
+      periodSeconds: 10

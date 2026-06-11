@@ -1,0 +1,63 @@
+name: url-shortener
+
+on:
+  pull_request: 
+    branches: [main]
+    types: [closed]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    if: github.event.pull_request.merged == true
+    steps:
+     - name: checkout code
+       uses: actions/checkout@v3
+     - name: sonarcloud scan
+       uses: sonarsource/sonarcloud-github-action@v7
+         env:
+            SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+  build:
+    runs-on: ubuntu-latest
+    needs : test
+    steps:
+     - name: checkout code
+          uses: actions/checkout@v3
+     - name: build dcoker images
+       run: |
+        docker build -t analytics-service:latest ./analytics-service
+        docker build -t shortener-service:latest ./shortener-service
+        docker build -t frontend:latest ./frontend
+        docker build -t api-gateway:latest ./api-gateway
+
+     - name: push docker images to dockerhub
+       run: |
+        docker login -u ${{ secrets.DOCKER_USERNAME }} -p ${{ secrets.DOCKER_PASSWORD }}
+        docker tag analytics-service:latest manojbk18/analytics-service:v${GITHUB_RUN_NUMBER}
+        docker tag api-gateway:latest manojbk18/api-gateway:v${GITHUB_RUN_NUMBER}
+        docker tag shortener-service:latest manojbk18/shortener-service:v${GITHUB_RUN_NUMBER}
+        docker tag frontend:latest manojbk18/frontend:v${GITHUB_RUN_NUMBER}
+
+        docker push manojbk18/analytics-service:v${GITHUB_RUN_NUMBER}
+        docker push manojbk18/api-gateway:v${GITHUB_RUN_NUMBER}
+        docker push manojbk18/shortener-service:v${GITHUB_RUN_NUMBER}
+        docker push manojbk18/frontend:v${GITHUB_RUN_NUMBER}
+  deploy:
+    runs-on: ubuntu-latest
+    needs : build
+    permissions:
+      contents: write
+    steps:
+     - name: checkout code
+       uses: actions/checkout@v3
+     - name: push chanes to github
+        run: |
+          sed -i 's|image: manojbk18/analytics-service:.*|image: manojbk18/analytics-service:v${GITHUB_RUN_NUMBER}|g' ./k8s/analytics-deployment.yaml
+          sed -i 's|image: manojbk18/api-gateway:.*|image: manojbk18/api-gateway:v${GITHUB_RUN_NUMBER}|g' ./k8s/api-gateway-deployment.yaml
+          sed -i 's|image: manojbk18/shortener-service:.*|image: manojbk18/shortener-service:v${GITHUB_RUN_NUMBER}|g' ./k8s/shortener-deployment.yaml
+          sed -i 's|image: manojbk18/frontend:.*|image: manojbk18/frontend:v${GITHUB_RUN_NUMBER}|g' ./k8s/frontend-deployment.yaml
+          git config --global user.name "github-actions"
+          git config --global user.email "github-actions@users.noreply.github.com"
+          git add .
+          git commit -m "Update docker images"
+          git checkout main
+          git push origin main

@@ -1,0 +1,18 @@
+apiVersion: apps/v1
+kind: ConfigMap
+metadata:
+  name: cm
+  namespace: url-shortener
+  labels:
+    app: url-shortener
+data:
+  POSTGRES_HOST: postgres-service
+  POSTGRES_PORT: 5432
+  POSTGRES_USER: postgres
+  POSTGRES_DB: url_shortener
+
+  REDIS_HOST: redis-service
+  REDIS_PORT: 6379
+
+  SHORTENER_SERVICE_URL: http://shortener-service.url-shortener.svc.cluster.local:8000
+  ANALYTICS_SERVICE_URL: http://analytics-service.url-shortener.svc.cluster.local:8080

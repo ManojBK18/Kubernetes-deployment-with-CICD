@@ -1,0 +1,60 @@
+apiversion: apps/v1
+kind: Statefulset
+metadata:
+  name: postres
+  namespace: url-shortener
+  labels:
+    app: postgres
+spec:
+  serviceName: postgres-service
+  replicas: 1
+  selector:
+    matchLabels:
+      app: postgres
+  template:
+    metadata:
+      Labels:
+        app: postgres
+    spec:
+      containers:
+        - name: postgres
+          image: postgres:latest
+          ports:
+            - containerPort: 5432
+          livenessProbe:
+            run: pg_isready -U postgres
+              port: 5432
+            initialDelaySeconds: 10
+            periodSeconds: 10
+          readinessProbe:
+            run: pg_isready -U postgres
+              port: 5432
+            initialDelaySeconds: 10
+            periodSeconds: 10
+          env:
+            -name: POSTGRES_USER
+             valueFrom:
+              configMapKeyRef:
+                name: cm
+                key: POSTGRES_USER
+            - name: POSTGRES_PASSWORD
+              valuefrom:
+                secretKeyRef:
+                  name: db-secret
+                  key: POSTGRES_PASSWORD
+            - name: POSTGRES_DB
+              valueFrom:
+                configMapKeyRef:
+                  name: cm
+                  key: POSTGRES_DB
+          volummemounts:
+            - name: db-data
+              moutpath: /var/lib/postgresql/data
+  volumeClaimTemplates:
+    - metadata:
+        name: db-data
+      spec:
+       accessmode; ReadWriteOnce
+        resources:
+          reuests:
+            storage: 2gi
