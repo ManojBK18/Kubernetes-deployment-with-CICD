@@ -54,7 +54,7 @@ jobs:
        with:
           ref: main
      - name: push chanes to github
-        run: |
+       run: |
           sed -i "s|image: manojbk18/analytics-service:.*|image: manojbk18/analytics-service:v${GITHUB_RUN_NUMBER}|g" ./k8s/analytics-deployment.yaml
           sed -i "s|image: manojbk18/api-gateway:.*|image: manojbk18/api-gateway:v${GITHUB_RUN_NUMBER}|g" ./k8s/api-gateway-deployment.yaml
           sed -i "s|image: manojbk18/shortener-service:.*|image: manojbk18/shortener-service:v${GITHUB_RUN_NUMBER}|g" ./k8s/shortener-deployment.yaml
