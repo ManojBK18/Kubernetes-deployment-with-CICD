@@ -32,8 +32,8 @@ spec:
             initialDelaySeconds: 10
             periodSeconds: 10
           env:
-            -name: POSTGRES_USER
-             valueFrom:
+            - name: POSTGRES_USER
+              valueFrom:
               configMapKeyRef:
                 name: cm
                 key: POSTGRES_USER
