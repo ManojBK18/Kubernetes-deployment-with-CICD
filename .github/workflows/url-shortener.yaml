@@ -9,12 +9,12 @@ on:
 
 jobs:
   test:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-latestgit 
     steps:
      - name: checkout code
        uses: actions/checkout@v4
      - name: sonarcloud scan
-       uses: sonarsource/sonarcloud-github-action@v7
+       uses: sonarsource/sonarcloud-github-action@v4
        env:
         SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
   build:
