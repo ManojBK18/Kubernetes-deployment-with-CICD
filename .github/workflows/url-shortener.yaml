@@ -23,7 +23,7 @@ jobs:
     needs : test
     steps:
      - name: checkout code
-        uses: actions/checkout@v4
+       uses: actions/checkout@v4
      - name: build dcoker images
        run: |
         docker build -t analytics-service:latest ./analytics-service
