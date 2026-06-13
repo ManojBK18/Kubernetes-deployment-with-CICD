@@ -16,7 +16,7 @@ spec:
         app: shortener
     spec:
       imagePullSecrets:
-        - name: docker-password
+        - name: app-secret
           key: dock-pass
       containers:
         - name: shortener

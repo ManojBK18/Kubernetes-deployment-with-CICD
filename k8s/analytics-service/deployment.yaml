@@ -11,45 +11,49 @@ spec:
     matchLabels:
       app: analytics
   template:
-    imagePullSecrets:
-      - name: docker-password
+    metadata:
+      labels:
+        app: analytics
+    spec:
+      imagePullSecrets:
+        - name: app-secret
         key: dock-pass
-    containers:
-      - name: analytics
-        image: manojbk18/analytics-service:latest
-        ports:
-          - containerPort: 8000
-        env:
-          - name: POSTGRES_USER
-            valueFrom:
-              configMapKeyRef:
-                name: cm
-                key: POSTGRES_USER
-          - name: POSTGRES_PASSWORD
-            valueFrom:
-              secretKeyRef:
-                name: db-secret
-                key: POSTGRES_PASSWORD
-          - name: POSTGRES_DB
-            valueFrom:
-              configMapKeyRef:
-                name: cm
-                key: POSTGRES_DB
-          - name: POSTGRES_HOST
-            valueFrom:
-              configMapKeyRef:
-                name: cm
-                key: POSTGRES_HOST
-        livenessProbe:
-          httpGet:
-            path: /health
-            port:8080
-          initialDelaySeconds: 10
-          periodSeconds: 10
-        readinessProbe:
-          httpGet:
-            path: /health
-            port:8080
-          initialDelaySeconds: 10
-          periodSeconds: 10
+      containers:
+        - name: analytics
+          image: manojbk18/analytics-service:latest
+          ports:
+            - containerPort: 8000
+          env:
+            - name: POSTGRES_USER
+              valueFrom:
+                configMapKeyRef:
+                  name: cm
+                  key: POSTGRES_USER
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: db-secret
+                  key: POSTGRES_PASSWORD
+            - name: POSTGRES_DB
+              valueFrom:
+                configMapKeyRef:
+                  name: cm
+                  key: POSTGRES_DB
+            - name: POSTGRES_HOST
+              valueFrom:
+                configMapKeyRef:
+                  name: cm
+                  key: POSTGRES_HOST
+          livenessProbe:
+            httpGet:
+              path: /health
+              port:8080
+            initialDelaySeconds: 10
+            periodSeconds: 10
+          readinessProbe:
+            httpGet:
+              path: /health
+              port:8080
+            initialDelaySeconds: 10
+            periodSeconds: 10
       

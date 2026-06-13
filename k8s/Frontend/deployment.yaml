@@ -14,23 +14,24 @@ spec:
     metadata:
       labels:
         app: frontend
-    imagePullSecrets:
-      - name: docker-password
-        key: dock-pass
-    containers:
-      - name: frontend
-        image: manojbk18/frontend:latest
-        ports:
-          - containerPort: 80
-    livenessProbe:
-      httpget: 
-        path: /health
-        port: 80
-      initialDelaySeconds: 10
-      periodSeconds: 10
-    readinessProbe:
-      httpget:
-        path: /health
-        port: 80
-      initialDelaySeconds: 10
-      periodSeconds: 10
+    spec:
+      imagePullSecrets:
+        - name: docker-password
+          key: dock-pass
+      containers:
+        - name: frontend
+          image: manojbk18/frontend:latest
+          ports:
+            - containerPort: 80
+      livenessProbe:
+        httpget: 
+          path: /health
+          port: 80
+        initialDelaySeconds: 10
+        periodSeconds: 10
+      readinessProbe:
+        httpget:
+          path: /health
+          port: 80
+        initialDelaySeconds: 10
+        periodSeconds: 10

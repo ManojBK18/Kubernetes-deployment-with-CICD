@@ -14,10 +14,10 @@ spec:
     metadata:
       labels:
         app: api-gateway
-    imagePullSecrets:
-      - name: docker-password
-        key: dock-pass
     spec:
+      imagePullSecret:
+        - name: app-secret
+          key: dock-pass
       containers:
         - name: api-gateway
           image: manojbk18/api-gateway:latest
