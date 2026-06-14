@@ -1,4 +1,4 @@
-apiersion: 1
+apiVersion: 1
 kind: Service
 metadata:
   name: frontend
