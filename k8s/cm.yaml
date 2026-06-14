@@ -6,7 +6,7 @@ metadata:
   labels:
     app: url-shortener
 data:
-  POSTGRES_HOST: postgres-service
+  POSTGRES_HOST: postgres-service.url-shortener.svc.cluster.local
   POSTGRES_PORT: "5432"
   POSTGRES_USER: postgres
   POSTGRES_DB: url_shortener
