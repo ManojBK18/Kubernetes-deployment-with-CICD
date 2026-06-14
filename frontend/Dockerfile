@@ -9,5 +9,5 @@ FROM nginx:latest
 WORKDIR /app
 RUN rm -rf /etc/nginx/conf.d/default.conf
 COPY nginx.conf /etc/nginx/conf.d/default.conf
-COPY --from=build /app/dist /app
+COPY --from=Build /app/dist /app
 EXPOSE 80
