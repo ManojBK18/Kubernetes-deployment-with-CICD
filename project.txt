@@ -1,0 +1,576 @@
+# URL Shortener Application Deployment on Amazon EKS with GitOps and CI/CD
+
+## Project Overview
+
+This project demonstrates the end-to-end deployment of a containerized Django-based URL Shortener application on Amazon EKS (Elastic Kubernetes Service).
+
+The project covers:
+
+* Docker containerization
+* Kubernetes deployments
+* Amazon EKS cluster administration
+* PostgreSQL database deployment
+* Persistent storage using AWS EBS
+* NGINX Ingress Controller
+* ArgoCD GitOps deployment
+* GitHub Actions CI pipeline
+* SonarQube code quality integration
+
+---
+
+# Architecture
+
+```text
+Developer
+    │
+    ▼
+GitHub Repository
+    │
+    ▼
+GitHub Actions
+    │
+ ┌──┴─────────┐
+ ▼            ▼
+Tests      SonarQube
+    │
+    ▼
+Docker Build
+    │
+    ▼
+Container Registry
+    │
+    ▼
+Amazon EKS
+    │
+ ┌──┼───────────────┐
+ ▼  ▼               ▼
+App PostgreSQL   ArgoCD
+ │      │
+ │      ▼
+ │   AWS EBS
+ │
+ ▼
+NGINX Ingress
+ │
+ ▼
+Users
+```
+
+---
+
+# Technology Stack
+
+| Component          | Technology               |
+| ------------------ | ------------------------ |
+| Cloud              | AWS                      |
+| Containerization   | Docker                   |
+| Orchestration      | Kubernetes               |
+| Managed Kubernetes | Amazon EKS               |
+| Database           | PostgreSQL               |
+| Storage            | AWS EBS                  |
+| Ingress            | NGINX Ingress Controller |
+| GitOps             | ArgoCD                   |
+| CI/CD              | GitHub Actions           |
+| Code Quality       | SonarQube                |
+| Language           | Python                   |
+| Framework          | Django                   |
+
+---
+
+# Prerequisites
+
+Before starting:
+
+* AWS Account
+* IAM User with EKS permissions
+* AWS CLI configured
+* kubectl installed
+* eksctl installed
+* Docker installed
+* Git installed
+* Helm installed
+
+---
+
+# Step 1: Containerize the Application
+
+Created a Dockerfile for the Django application.
+
+Build image:
+
+```bash
+docker build -t url-shortener .
+```
+
+Run locally:
+
+```bash
+docker run -p 8000:8000 url-shortener
+```
+
+Verify application functionality before deployment.
+
+---
+
+# Step 2: Push Image to Registry
+
+Login:
+
+```bash
+docker login
+```
+
+Tag image:
+
+```bash
+docker tag url-shortener username/url-shortener:v1
+```
+
+Push image:
+
+```bash
+docker push username/url-shortener:v1
+```
+
+---
+
+# Step 3: Create Amazon EKS Cluster
+
+Provisioned an EKS cluster.
+
+Configure kubectl:
+
+```bash
+aws eks update-kubeconfig \
+--region ap-south-1 \
+--name url-shortener-cluster
+```
+
+Verify nodes:
+
+```bash
+kubectl get nodes
+```
+
+Expected:
+
+```text
+STATUS: Ready
+```
+
+---
+
+# Step 4: Create Kubernetes Namespace
+
+```yaml
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: url-shortener
+```
+
+Apply:
+
+```bash
+kubectl apply -f namespace.yaml
+```
+
+---
+
+# Step 5: Configure Image Pull Secret
+
+Required for pulling private container images.
+
+```bash
+kubectl create secret docker-registry regcred \
+--docker-username=<username> \
+--docker-password=<password> \
+--docker-email=<email> \
+-n url-shortener
+```
+
+Verify:
+
+```bash
+kubectl get secrets -n url-shortener
+```
+
+---
+
+# Step 6: Deploy PostgreSQL
+
+Created:
+
+* Deployment
+* Service
+* PersistentVolumeClaim
+
+Database configuration:
+
+```yaml
+POSTGRES_DB
+POSTGRES_USER
+POSTGRES_PASSWORD
+```
+
+Verify:
+
+```bash
+kubectl get pods -n url-shortener
+```
+
+---
+
+# Step 7: Configure Persistent Storage
+
+Amazon EKS uses the AWS EBS CSI Driver for dynamic volume provisioning.
+
+Verify available Storage Classes:
+
+```bash
+kubectl get storageclass
+```
+
+Example:
+
+```text
+gp3 (default)
+```
+
+Create PVC:
+
+```yaml
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: postgres-pvc
+spec:
+  storageClassName: gp3
+
+  accessModes:
+    - ReadWriteOnce
+
+  resources:
+    requests:
+      storage: 10Gi
+```
+
+When the PVC is created:
+
+```text
+PVC
+ ↓
+StorageClass (gp3)
+ ↓
+AWS EBS Volume
+ ↓
+PostgreSQL Pod
+```
+
+Verify:
+
+```bash
+kubectl get pvc
+```
+
+---
+
+# Step 8: Deploy Application
+
+Deployment includes:
+
+* Django container
+* Environment variables
+* Database configuration
+* Image Pull Secret
+
+Apply:
+
+```bash
+kubectl apply -f deployment.yaml
+```
+
+Verify:
+
+```bash
+kubectl get deployments
+kubectl get pods
+```
+
+---
+
+# Step 9: Create Service
+
+Created a ClusterIP service for internal communication.
+
+```yaml
+kind: Service
+spec:
+  selector:
+    app: url-shortener
+```
+
+Apply:
+
+```bash
+kubectl apply -f service.yaml
+```
+
+Verify:
+
+```bash
+kubectl get svc
+```
+
+---
+
+# Step 10: Configure Health Checks
+
+Implemented:
+
+### Readiness Probe
+
+Ensures application is ready to receive traffic.
+
+### Liveness Probe
+
+Detects unhealthy containers and restarts them automatically.
+
+Troubleshooting performed:
+
+* Diagnosed HTTP 405 errors
+* Updated probe endpoints
+* Verified successful probe responses
+
+---
+
+# Step 11: Install NGINX Ingress Controller
+
+Installed NGINX Ingress Controller.
+
+Verify:
+
+```bash
+kubectl get pods -n ingress-nginx
+```
+
+---
+
+# Step 12: Configure Ingress
+
+Created an Ingress resource to expose the application.
+
+Responsibilities:
+
+* External access
+* Request routing
+* Centralized entry point
+
+Verify:
+
+```bash
+kubectl get ingress
+```
+
+---
+
+# Step 13: Deploy and Verify Application
+
+Checked:
+
+```bash
+kubectl get pods
+kubectl get svc
+kubectl get ingress
+```
+
+Verified successful access through the Ingress endpoint.
+
+---
+
+# Step 14: Install ArgoCD
+
+Create namespace:
+
+```bash
+kubectl create namespace argocd
+```
+
+Install ArgoCD:
+
+```bash
+kubectl apply -n argocd \
+-f https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/install.yaml
+```
+
+Verify:
+
+```bash
+kubectl get pods -n argocd
+```
+
+---
+
+# Step 15: Expose ArgoCD UI
+
+Changed ArgoCD service type to NodePort.
+
+```bash
+kubectl edit svc argocd-server -n argocd
+```
+
+Update:
+
+```yaml
+type: NodePort
+```
+
+Verify:
+
+```bash
+kubectl get svc -n argocd
+```
+
+Access:
+
+```text
+https://<NODE-IP>:<NODEPORT>
+```
+
+---
+
+# Step 16: Retrieve ArgoCD Admin Password
+
+```bash
+kubectl -n argocd get secret argocd-initial-admin-secret \
+-o jsonpath="{.data.password}" | base64 -d
+```
+
+Login:
+
+```text
+Username: admin
+Password: <retrieved-password>
+```
+
+---
+
+# Step 17: GitOps Workflow
+
+Configured ArgoCD to monitor Kubernetes manifests.
+
+Workflow:
+
+```text
+Git Repository
+      │
+      ▼
+   ArgoCD
+      │
+      ▼
+ Kubernetes
+```
+
+Benefits:
+
+* Declarative deployments
+* Automatic synchronization
+* Rollback support
+* Drift detection
+
+---
+
+# Step 18: GitHub Actions CI Pipeline
+
+Pipeline stages:
+
+1. Checkout Source Code
+2. Run Tests
+3. SonarQube Analysis
+4. Build Docker Image
+5. Push Docker Image
+
+Workflow:
+
+```text
+Developer
+    │
+Git Push
+    │
+    ▼
+GitHub Actions
+    │
+ ┌──┴───┐
+ ▼      ▼
+Tests  SonarQube
+    │
+    ▼
+Docker Build
+    │
+    ▼
+Push Image
+```
+
+---
+
+# Troubleshooting Highlights
+
+### Image Pull Errors
+
+```bash
+kubectl describe pod <pod-name>
+```
+
+### Probe Failures
+
+```bash
+kubectl logs <pod-name>
+```
+
+### PVC Issues
+
+```bash
+kubectl get pvc
+```
+
+### Service Connectivity
+
+```bash
+kubectl get svc
+```
+
+### Ingress Issues
+
+```bash
+kubectl describe ingress
+```
+
+---
+
+# Key Learning Outcomes
+
+* Docker image creation and management
+* Kubernetes deployments and services
+* EKS cluster administration
+* Persistent storage using AWS EBS
+* Kubernetes health checks
+* Ingress configuration
+* GitOps implementation using ArgoCD
+* CI/CD pipeline design using GitHub Actions
+* SonarQube integration
+* Kubernetes troubleshooting and debugging
+
+---
+
+# Future Enhancements
+
+* Terraform-based EKS provisioning
+* AWS Load Balancer Controller
+* ExternalDNS
+* cert-manager
+* Prometheus monitoring
+* Grafana dashboards
+* ArgoCD Auto Sync
+* Blue/Green deployments
+* Canary deployments
+* Karpenter autoscaling
