@@ -20,7 +20,7 @@ spec:
           key: dock-pass
       containers:
         - name: api-gateway
-          image: manojbk18/api-gateway:v22
+          image: manojbk18/api-gateway:v23
           ports:
             - containerPort: 3000
           env:

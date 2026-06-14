@@ -20,7 +20,7 @@ spec:
           key: dock-pass
       containers:
         - name: frontend
-          image: manojbk18/frontend:v22
+          image: manojbk18/frontend:v23
           ports:
             - containerPort: 80
       livenessProbe:
