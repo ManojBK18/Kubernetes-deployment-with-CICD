@@ -6,7 +6,7 @@ metadata:
   labels:
     app: shortener
 spec:
-  type: clusterIP
+  type: ClusterIP
   selector:
     app: shortener
   ports:
