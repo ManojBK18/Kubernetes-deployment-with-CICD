@@ -1,7 +1,7 @@
 apiversion: apps/v1
 kind: Statefulset
 metadata:
-  name: postres
+  name: postgres
   namespace: url-shortener
   labels:
     app: postgres
@@ -54,7 +54,7 @@ spec:
     - metadata:
         name: db-data
       spec:
-       accessmode; ReadWriteOnce
+        accessmode; ReadWriteOnce
         resources:
           reuests:
             storage: 2gi

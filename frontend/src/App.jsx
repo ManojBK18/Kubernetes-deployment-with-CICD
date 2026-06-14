@@ -6,7 +6,7 @@ function App() {
   const [analytics, setAnalytics] = useState(null);
   const [error, setError] = useState("");
 
-  const API = "http://localhost:3000"; // API Gateway
+  const API = ""; // API Gateway
 
   const shorten = async () => {
     setError("");
