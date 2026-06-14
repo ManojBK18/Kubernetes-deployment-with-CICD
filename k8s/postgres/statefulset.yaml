@@ -1,4 +1,4 @@
-apiversion: apps/v1
+apiVersion: apps/v1
 kind: StatefulSet
 metadata:
   name: postgres
@@ -13,7 +13,7 @@ spec:
       app: postgres
   template:
     metadata:
-      Labels:
+      labels:
         app: postgres
     spec:
       containers:
@@ -22,23 +22,29 @@ spec:
           ports:
             - containerPort: 5432
           livenessProbe:
-            run: pg_isready -U postgres
-              port: 5432
+            exec:
+              command:
+                - pg_isready
+                - -U
+                - postgres
             initialDelaySeconds: 10
             periodSeconds: 10
           readinessProbe:
-            run: pg_isready -U postgres
-              port: 5432
+            exec:
+              command:
+                - pg_isready
+                - -U
+                - postgres
             initialDelaySeconds: 10
             periodSeconds: 10
           env:
             - name: POSTGRES_USER
               valueFrom:
-              configMapKeyRef:
-                name: cm
-                key: POSTGRES_USER
+                configMapKeyRef:
+                  name: cm
+                  key: POSTGRES_USER
             - name: POSTGRES_PASSWORD
-              valuefrom:
+              valueFrom:
                 secretKeyRef:
                   name: db-secret
                   key: POSTGRES_PASSWORD
@@ -47,14 +53,15 @@ spec:
                 configMapKeyRef:
                   name: cm
                   key: POSTGRES_DB
-          volummemounts:
+          volumeMounts:
             - name: db-data
-              moutpath: /var/lib/postgresql/data
+              mountPath: /var/lib/postgresql/data
   volumeClaimTemplates:
     - metadata:
         name: db-data
       spec:
-        accessmode; ReadWriteOnce
+        accessModes:
+          - ReadWriteOnce
         resources:
-          reuests:
-            storage: 2gi
+          requests:
+            storage: 2Gi
