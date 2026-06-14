@@ -6,7 +6,7 @@ metadata:
   labels:
     app: analytics
 spec:
-  type: clusterIP
+  type: ClusterIP
   selector:
     app: analytics
   ports:

@@ -6,7 +6,7 @@ metadata:
   labels:
     app: frontend
 spec:
-  type: clusterIP
+  type: ClusterIP
   selector:
     app: frontend
   ports:
