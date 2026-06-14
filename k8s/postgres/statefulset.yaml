@@ -1,5 +1,5 @@
 apiversion: apps/v1
-kind: Statefulset
+kind: StatefulSet
 metadata:
   name: postgres
   namespace: url-shortener
