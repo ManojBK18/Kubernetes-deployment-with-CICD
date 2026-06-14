@@ -60,13 +60,13 @@ spec:
                   name: cm
                   key: POSTGRES_DB
           livenessProbe:
-            httpget:
+            httpGet:
               path: /health
               port: 8000
             initialDelaySeconds: 10
             periodSeconds: 10
           readinessProbe:
-            httpget:
+            httpGet:
               path: /ready
               port: 8000
             initialDelaySeconds: 10
