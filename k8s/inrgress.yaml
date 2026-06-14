@@ -12,7 +12,7 @@ spec:
         paths:
           - path: /
             pathType: Prefix
-            backkend:
+            backend:
               service:
                 name: frontend-service
                 port:
@@ -20,7 +20,7 @@ spec:
 
           - path: /api
             pathType: Prefix
-            backkend:
+            backend:
               service:
                 name: api-gateway-service
                 port:
