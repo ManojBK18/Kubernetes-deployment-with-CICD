@@ -20,7 +20,7 @@ spec:
           key: dock-pass
       containers:
         - name: analytics
-          image: manojbk18/analytics-service:v23
+          image: manojbk18/analytics-service:v24
           ports:
             - containerPort: 8000
           env:

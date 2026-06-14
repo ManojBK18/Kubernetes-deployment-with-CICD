@@ -20,7 +20,7 @@ spec:
           key: dock-pass
       containers:
         - name: shortener
-          image: manojbk18/shortener-service:v23
+          image: manojbk18/shortener-service:v24
           ports:
             - containerPort: 8000
           env:
